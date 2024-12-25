@@ -154,3 +154,26 @@ footer {
     justify-content: center;
   }
 }
+
+.cta {
+  text-align: center;
+  margin: 3rem 0;
+}
+
+.waitlist-button {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background-color: var(--secondary-bg);
+  color: var(--accent-color);
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  border: 2px solid var(--accent-color);
+  transition: all 0.2s;
+}
+
+.waitlist-button:hover {
+  background-color: var(--accent-color);
+  color: var(--bg-color);
+  transform: translateY(-2px);
+}
