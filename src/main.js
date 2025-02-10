@@ -23,6 +23,17 @@ document.querySelector('#app').innerHTML = `
 
 setupCounter(document.querySelector('#counter'))
 
+// Prevent default behavior for internal links
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a')
+  if (link && link.href.startsWith(window.location.origin)) {
+    e.preventDefault()
+    const path = link.pathname
+    history.pushState(null, '', path)
+    handleRoute()
+  }
+})
+
 // Simple router
 const router = {
   '/': () => fetch('/index.html'),
@@ -44,7 +55,13 @@ async function handleRoute() {
     const mainContent = html.match(/<main[^>]*>([\s\S]*)<\/main>/i)?.[1]
     if (mainContent) {
       document.querySelector('main').innerHTML = mainContent
-      document.title = html.match(/<title[^>]*>([\s\S]*)<\/title>/i)?.[1] || 'Spark'
+      // Update title
+      const titleMatch = html.match(/<title[^>]*>([\s\S]*)<\/title>/i)
+      if (titleMatch) {
+        document.title = titleMatch[1]
+      }
+      // Scroll to top
+      window.scrollTo(0, 0)
     }
   } catch (error) {
     console.error('Navigation error:', error)
@@ -56,6 +73,4 @@ async function handleRoute() {
 window.addEventListener('popstate', handleRoute)
 
 // Handle initial route
-if (window.location.pathname !== '/') {
-  handleRoute()
-}
+handleRoute()
