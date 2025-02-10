@@ -23,7 +23,48 @@ document.querySelector('#app').innerHTML = `
 
 setupCounter(document.querySelector('#counter'))
 
-// Prevent default behavior for internal links
+// Simple router paths
+const routes = {
+  '/': {
+    template: '/index.html',
+    title: 'Spark - From Idea to MVP in 24 Hours'
+  },
+  '/privacy': {
+    template: '/privacy.html',
+    title: 'Privacy Policy - Spark'
+  },
+  '/terms': {
+    template: '/terms.html',
+    title: 'Terms & Conditions - Spark'
+  }
+}
+
+// Handle navigation
+async function handleRoute() {
+  const path = window.location.pathname
+  const route = routes[path] || routes['/']
+  
+  try {
+    const response = await fetch(route.template)
+    if (!response.ok) throw new Error('Page not found')
+    const html = await response.text()
+    
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(html, 'text/html')
+    const mainContent = doc.querySelector('main')
+    
+    if (mainContent) {
+      document.querySelector('main').innerHTML = mainContent.innerHTML
+      document.title = route.title
+      window.scrollTo(0, 0)
+    }
+  } catch (error) {
+    console.error('Navigation error:', error)
+    window.location.href = '/404.html'
+  }
+}
+
+// Handle link clicks
 document.addEventListener('click', (e) => {
   const link = e.target.closest('a')
   if (link && link.href.startsWith(window.location.origin)) {
@@ -34,43 +75,8 @@ document.addEventListener('click', (e) => {
   }
 })
 
-// Simple router
-const router = {
-  '/': () => fetch('/index.html'),
-  '/privacy': () => fetch('/src/pages/privacy.html'),
-  '/terms': () => fetch('/src/pages/terms.html'),
-}
-
-// Handle navigation
-async function handleRoute() {
-  const path = window.location.pathname
-  const route = router[path] || router['/']
-  
-  try {
-    const response = await route()
-    if (!response.ok) throw new Error('Page not found')
-    const html = await response.text()
-    
-    // Extract the content between <main> tags
-    const mainContent = html.match(/<main[^>]*>([\s\S]*)<\/main>/i)?.[1]
-    if (mainContent) {
-      document.querySelector('main').innerHTML = mainContent
-      // Update title
-      const titleMatch = html.match(/<title[^>]*>([\s\S]*)<\/title>/i)
-      if (titleMatch) {
-        document.title = titleMatch[1]
-      }
-      // Scroll to top
-      window.scrollTo(0, 0)
-    }
-  } catch (error) {
-    console.error('Navigation error:', error)
-    window.location.href = '/404.html'
-  }
-}
-
-// Listen for navigation events
+// Handle browser back/forward
 window.addEventListener('popstate', handleRoute)
 
-// Handle initial route
+// Handle initial load
 handleRoute()
